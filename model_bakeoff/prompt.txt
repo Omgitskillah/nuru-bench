@@ -367,7 +367,7 @@ MSA Safety
 - Sensor integration
 
 ## Contact
-alice.chen@msasafety.com
+alice.chen@example.com
 
 ## Notes
 Lead designer on Area Monitor hardware team. Strong experience with battery-powered devices.

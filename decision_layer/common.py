@@ -17,7 +17,7 @@ import requests
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 RUNS = HERE / ".runs"
-DUMMY_VAULT = Path(os.environ.get("NURU_EVAL_VAULT", "/Users/aluchoayisi/Desktop/dummyVault"))
+DUMMY_VAULT = Path(os.environ.get("NURU_EVAL_VAULT", HERE.parent / "vaults" / "dummyVault"))
 OLLAMA = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 # The notes write tests 28-31 are about (dummyVault ids).
