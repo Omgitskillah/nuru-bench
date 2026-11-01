@@ -65,12 +65,13 @@ def main():
     records = []
     case = json.loads(args.case.read_text()) if args.case else None
     turns = case["turns"] if case else [{"prompt": args.prompt}]
+    stopped = None  # why the sequence stopped: a timed-out turn ends it for every turn after it
     try:
         for turn in turns:
             prompt = turn["prompt"]
-            if records and records[-1].get("timed_out"):
+            if stopped:
                 # Later prompts assume the earlier turn finished: record them, but don't send them.
-                records.append({"prompt": prompt, "not_run": True, "checks": turn["checks"],
+                records.append({"prompt": prompt, "not_run": True, "not_run_reason": stopped, "checks": turn["checks"],
                                 **({"writes": turn["writes"]} if "writes" in turn else {})})
                 continue
             before = vault_snapshot(Path(os.environ["VAULT_PATH"]))
@@ -110,6 +111,8 @@ def main():
                     "vault_changes": snapshot_changes(before, vault_snapshot(Path(os.environ["VAULT_PATH"])))
                     } if case else {}),
             })
+            if cancel.is_set():
+                stopped = f"turn {len(records)} timed out"
         session_id = s.logger.session_id
     finally:
         s.close()

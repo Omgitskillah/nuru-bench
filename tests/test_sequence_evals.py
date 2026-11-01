@@ -133,8 +133,43 @@ def test_driver_cancels_a_turn_at_its_deadline_and_does_not_send_later_turns(mod
     assert prompts == ["first", "slow"]
     assert not first["timed_out"] and first["failure"] is None
     assert slow["timed_out"] and "timed out after 0.2 s" in slow["failure"]
-    assert third == {"prompt": "third", "not_run": True, "checks": {}}
+    assert third == {"prompt": "third", "not_run": True, "not_run_reason": "turn 2 timed out", "checks": {}}
     assert output["turns_not_run"] == 1 and output["failure"] == slow["failure"]
+
+
+def test_a_timed_out_first_turn_stops_every_later_turn_of_the_sequence(modules, monkeypatch, tmp_path):
+    """Astra, 2026-11-01: the driver looked only at the turn before, and a skipped turn isn't timed out,
+    so after turn 1 timed out it skipped 2, sent 3 to the same session, skipped 4 (test 38's sweep)."""
+    import time
+    from types import SimpleNamespace
+    _, _, _, driver = modules
+    prompts = []
+    class FakeSession:
+        shadow = SimpleNamespace(failures=0, off=set())
+        logger = SimpleNamespace(session_id="test")
+        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text='{"laya":{"state":"ready"}}'))
+        def ask(self, prompt, cancel=None):
+            prompts.append(prompt)
+            while prompt == "t1" and not cancel.is_set():
+                time.sleep(0.01)
+                yield driver.Text(".")
+            yield driver.Text("answer")
+        def close(self):
+            pass
+    monkeypatch.setattr(driver.session.Session, "start", FakeSession)
+    for key in ("VAULT_PATH", "OBSIDIAN_SEMANTIC_DB", "NURU_DECISION_CONFIG", "NURU_LOG_DIR"):
+        monkeypatch.setenv(key, str(tmp_path))
+    case = tmp_path / "case.json"
+    case.write_text(json.dumps({"turns": [{"prompt": f"t{i}", "checks": {}} for i in range(1, 5)]}))
+    out = tmp_path / "out.json"
+    monkeypatch.setattr("sys.argv", ["drive_turn", "--case", str(case), "--think", "off", "--out", str(out),
+                                     "--turn-timeout", "0.2"])
+    driver.main()
+    output = json.loads(out.read_text())
+    assert prompts == ["t1"], "only turn 1 reached the session"
+    assert output["turns"][0]["timed_out"]
+    assert [t.get("not_run_reason") for t in output["turns"][1:]] == ["turn 1 timed out"] * 3
+    assert output["turns_not_run"] == 3
 
 
 @pytest.mark.parametrize("case,flag,deadline", [
@@ -436,3 +471,106 @@ def test_suite_gives_a_case_its_own_notes_indexed_and_not_counted_as_changes(mod
     changes = [json.loads(line)["vault_changes"] for line in (batch / "results.jsonl").read_text().splitlines()]
     assert changes[0] == [] and changes[2] == []
     assert changes[1] == [{"path": "user/log.md", "before": "| a | b |", "after": "| a | b |\n| 1 | 2 |"}]
+
+
+def _driven(driver, monkeypatch, tmp_path, session_class, turns, *argv):
+    monkeypatch.setattr(driver.session.Session, "start", session_class)
+    monkeypatch.setattr(driver.time, "sleep", lambda seconds: None)
+    for key in ("VAULT_PATH", "OBSIDIAN_SEMANTIC_DB", "NURU_DECISION_CONFIG"):
+        monkeypatch.setenv(key, str(tmp_path))
+    (tmp_path / "logs").mkdir(exist_ok=True)
+    monkeypatch.setenv("NURU_LOG_DIR", str(tmp_path / "logs"))
+    case = tmp_path / "case.json"
+    case.write_text(json.dumps({"name": "seq", "turns": [{"prompt": p, "checks": {}} for p in turns]}))
+    out = tmp_path / "out.json"
+    monkeypatch.setattr("sys.argv", ["drive_turn", "--case", str(case), "--think", "off", "--out", str(out), *argv])
+    driver.main()
+    return json.loads(out.read_text())
+
+
+def test_the_driver_records_each_kind_of_event_and_each_turns_own_model_calls(modules, monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    from core.questions import Question, YES_NO
+    _, _, _, driver = modules
+    health = iter(['{"laya":{"state":"loading"}}', '{"laya":{"state":"loading"}}', '{"laya":{"state":"ready"}}'])
+    log = tmp_path / "logs" / "20261101_seq.jsonl"
+
+    class FakeSession:
+        shadow = SimpleNamespace(failures=1, off=set())  # Laya on: wait while it loads
+        logger = SimpleNamespace(session_id="seq")
+        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text=next(health)))
+
+        def ask(self, prompt, cancel=None):
+            with log.open("a") as f:  # the session logs a turn's start and its model calls
+                f.write(json.dumps({"event": "turn_start"}) + "\n")
+                f.write(json.dumps({"event": "model_call", "duration_ms": 1500, "prompt_tokens": 10, "completion_tokens": 2,
+                                    "stop_reason": "stop", "tool_calls_requested": [], "cache_read_tokens": 4}) + "\n")
+            if prompt == "one":
+                yield driver.Thinking("hm")
+                yield driver.ToolCall("search", {"query": "x"})
+                yield driver.ToolCall("ask_an_expert", {})
+                yield driver.RetryWithoutThinking()
+                yield driver.Text("found")
+                yield driver.Failure("the model stopped")
+            else:
+                yield driver.Text("Which?")
+                yield driver.Ask(Question(text="Delete it?", kind=YES_NO))
+
+        def close(self):
+            pass
+
+    output = _driven(driver, monkeypatch, tmp_path, FakeSession, ["one", "two"])
+    one, two = output["turns"]
+    assert one["laya_state"] == "ready", "it waited out 'loading'"
+    assert one["tool_calls"] == [{"name": "search", "arguments": {"query": "x"}}, {"name": "ask_an_expert", "arguments": {}}]
+    assert one["thinking_events"] == 1 and one["retried_without_thinking"] and one["expert_calls"] == 1
+    assert one["failure"] == "the model stopped" and one["reply"] == "found"
+    assert two["asked"] and "Delete it?" in two["asked"] and two["reply"].startswith("Which?\n\n")
+    assert [len(t["model_calls"]) for t in output["turns"]] == [1, 1], "each turn gets its own call, not both"
+    assert one["model_calls"][0]["cache_read_tokens"] == 4 and output["model_seconds"] == 3.0
+    assert output["failure"] == "the model stopped" and output["expert_calls"] == 1
+    assert one["shadow_failures"] == 1 and output["retried_without_thinking"] and output["thinking_events"] == 1
+
+
+def test_laya_unreachable_is_recorded_and_the_turn_still_runs(modules, monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    _, _, _, driver = modules
+
+    class FakeSession:
+        shadow = SimpleNamespace(failures=0, off=set())
+        logger = SimpleNamespace(session_id="u")
+        tools = SimpleNamespace(call_harness_tool=lambda *a: (_ for _ in ()).throw(ConnectionError("down")))
+
+        def ask(self, prompt, cancel=None):
+            yield driver.Text("ok")
+
+        def close(self):
+            pass
+
+    output = _driven(driver, monkeypatch, tmp_path, FakeSession, ["only"])
+    assert output["turns"][0]["laya_state"] == "unreachable" and output["turns"][0]["reply"] == "ok"
+
+
+def test_run_as_a_script_it_drives_the_case(modules, monkeypatch, tmp_path):
+    import runpy
+    from types import SimpleNamespace
+    _, _, _, driver = modules
+
+    class FakeSession:
+        shadow = SimpleNamespace(failures=0, off=driver.session.LAYA_POINTS)  # Laya off: no wait at all
+        logger = SimpleNamespace(session_id="s")
+        tools = None
+
+        def ask(self, prompt, cancel=None):
+            yield driver.Text("done")
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(driver.session.Session, "start", FakeSession)
+    for key in ("VAULT_PATH", "OBSIDIAN_SEMANTIC_DB", "NURU_DECISION_CONFIG", "NURU_LOG_DIR"):
+        monkeypatch.setenv(key, str(tmp_path))
+    out = tmp_path / "out.json"
+    monkeypatch.setattr("sys.argv", ["drive_turn.py", "--prompt", "hi", "--think", "off", "--out", str(out)])
+    runpy.run_path(driver.__file__, run_name="__main__")
+    assert json.loads(out.read_text())["reply"] == "done"
