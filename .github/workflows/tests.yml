@@ -1,0 +1,74 @@
+name: Tests
+
+# The bench's tests run inside a Nuru checkout, with this repo at nuru/evals (where Nuru's
+# submodule puts it). Ubuntu only, once per change: runs cost minutes.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      stewardship_scale:
+        description: Run model-free 1K/10K stewardship scale evaluation
+        type: boolean
+        default: false
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Nuru
+        uses: actions/checkout@v5
+        with:
+          repository: Omgitskillah/Nuru
+          ref: main
+
+      - name: Read pinned Obsidian revision
+        id: obsidian
+        run: echo "revision=$(git rev-parse HEAD:servers/obsidian)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out Obsidian dependency
+        uses: actions/checkout@v5
+        with:
+          repository: Omgitskillah/obsidian-4-llms
+          ref: ${{ steps.obsidian.outputs.revision }}
+          path: servers/obsidian
+          token: ${{ secrets.OBSIDIAN_REPO_TOKEN || github.token }}
+
+      # Until Nuru's main has the submodule, its own copy of the evals sits at this path.
+      - name: Clear nuru/evals
+        run: rm -rf nuru/evals
+
+      - name: Check out the bench at nuru/evals
+        uses: actions/checkout@v5
+        with:
+          path: nuru/evals
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.1.0
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run tests
+        env:
+          VAULT_PATH: ${{ runner.temp }}/ci-vault
+          OBSIDIAN_SEMANTIC_DB: ''
+          NURU_STEWARD_ENABLED: '0'
+        run: timeout 900 uv run --locked pytest -v -o faulthandler_timeout=180 nuru/evals/tests
+
+      - name: Model-free stewardship scale evaluation
+        if: github.event_name == 'workflow_dispatch' && inputs.stewardship_scale
+        run: uv run --locked python nuru/evals/vault_steward/steward_eval.py --sizes 1000,10000 --repeats 5 --output "$RUNNER_TEMP/steward-results.json"
+
+      - name: Save stewardship scale results
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.stewardship_scale
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: stewardship-scale-results
+          path: ${{ runner.temp }}/steward-results.json
+          retention-days: 7
