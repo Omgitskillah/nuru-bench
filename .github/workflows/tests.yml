@@ -59,7 +59,13 @@ jobs:
           VAULT_PATH: ${{ runner.temp }}/ci-vault
           OBSIDIAN_SEMANTIC_DB: ''
           NURU_STEWARD_ENABLED: '0'
-        run: timeout 900 uv run --locked pytest -v -o faulthandler_timeout=180 nuru/evals/tests
+        run: timeout 900 uv run --locked pytest -v -o faulthandler_timeout=180 nuru/evals/tests --cov=nuru/evals --cov-report=term-missing
+
+      # Nuru's F13 rule on the bench modules whose code changed (tools/coverage_check.py lists them).
+      - name: Coverage gate
+        run: |
+          uv run --locked coverage json -o coverage.json
+          uv run --locked python nuru/evals/tools/coverage_check.py coverage.json
 
       - name: Model-free stewardship scale evaluation
         if: github.event_name == 'workflow_dispatch' && inputs.stewardship_scale
