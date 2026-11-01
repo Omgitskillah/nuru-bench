@@ -26,6 +26,19 @@ def load_cases(path: Path) -> dict[int, dict]:
                     raise ValueError(f"case {key}: writes must map labels to regexes")
                 for pattern in turn["writes"].values():
                     re.compile(pattern.replace("{today}", "2026-01-01"))
+        # Optional: notes only this case needs, so the shared dummyVault stays as every other test
+        # knows it. Each maps a vault-relative path to a file next to the cases file; run_suite copies
+        # them into the case's scratch vault and indexes them, and they don't count as changes.
+        if "vault_files" in case:
+            files = case["vault_files"]
+            if not isinstance(files, dict) or not files:
+                raise ValueError(f"case {key}: vault_files must map vault paths to fixture files")
+            for target, source in files.items():
+                if Path(target).is_absolute() or ".." in Path(target).parts:
+                    raise ValueError(f"case {key}: vault path {target!r} must stay inside the vault")
+                if not (path.parent / source).is_file():
+                    raise ValueError(f"case {key}: no fixture file {source!r}")
+            case["vault_files"] = {target: str((path.parent / source).resolve()) for target, source in files.items()}
     return {int(key): case for key, case in cases.items()}
 
 

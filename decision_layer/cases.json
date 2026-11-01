@@ -35,5 +35,47 @@
     }
    }
   ]
+ },
+ "38": {
+  "name": "statistics from a large table",
+  "vault_files": {
+   "user/soak-test-v0.9.4-log.md": "fixtures/soak-test-v0.9.4-log.md"
+  },
+  "turns": [
+   {
+    "prompt": "From my v0.9.4 soak test log, what were the mean and standard deviation of the average current for each of the three units? Leave out the samples the logger dropped.",
+    "checks": {
+     "AM-01 mean 403.85 µA": "(?<![\\d.])(?:403\\.8|403\\.85|403\\.9)(?![\\d])",
+     "AM-02 mean 451.36 µA": "(?<![\\d.])(?:451\\.36|451\\.4)(?![\\d])",
+     "AM-03 mean 456.82 µA": "(?<![\\d.])(?:456\\.8|456\\.82)(?![\\d])",
+     "AM-01 SD 17.00 µA (16.88 population)": "(?<![\\d.])(?:17\\.0|17\\.00|16\\.88|16\\.9)(?![\\d])",
+     "AM-02 SD 24.75 µA (24.57 population)": "(?<![\\d.])(?:24\\.75|24\\.8|24\\.57|24\\.6)(?![\\d])",
+     "AM-03 SD 171.10 µA (169.89 population)": "(?<![\\d.])(?:171\\.1|171\\.10|169\\.89|169\\.9)(?![\\d])"
+    }
+   },
+   {
+    "prompt": "Which single reading was the highest - on which unit and at what time? And how many samples did the logger drop in all?",
+    "checks": {
+     "highest reading 1874.2 µA": "(?<![\\d.])(?:1874\\.2)(?![\\d])",
+     "on AM-03": "(?i)\\bAM-?0?3\\b",
+     "at 03:00 on 09-19": "(?i)(?:09-19|19 sep|sep\\w* 19)[^\\n]{0,40}(?:03:00|\\b3(?::00)?\\s*a\\.?m)|(?:03:00|\\b3(?::00)?\\s*a\\.?m)[^\\n]{0,40}(?:09-19|19 sep|sep\\w* 19)",
+     "5 dropped samples": "(?i)\\b(?:5|five)\\b[^.\\n]{0,40}(?:drop|sample|missing|missed|gap)|(?:drop|missing|missed)[^.\\n]{0,40}\\b(?:5|five)\\b"
+    }
+   },
+   {
+    "prompt": "AM-02 seems to draw more when the room is warmer. Fit its current against temperature: how many µA per °C does it rise, and what's the r²?",
+    "checks": {
+     "slope 12.66 µA/°C": "(?<![\\d.])(?:12\\.66|12\\.663|12\\.7)(?![\\d])",
+     "r² 0.958": "(?<![\\d.])(?:0\\.958|0\\.9584|0\\.96)(?![\\d])"
+    }
+   },
+   {
+    "prompt": "Leave out AM-03's stuck-modem hour. What are AM-03's mean and standard deviation then?",
+    "checks": {
+     "AM-03 mean without the spike 436.57 µA": "(?<![\\d.])(?:436\\.57|436\\.573|436\\.6)(?![\\d])",
+     "AM-03 SD without the spike 12.95 µA (12.86 population)": "(?<![\\d.])(?:12\\.95|12\\.954|13\\.0|12\\.86|12\\.9)(?![\\d])"
+    }
+   }
+  ]
  }
 }

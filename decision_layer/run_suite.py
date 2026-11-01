@@ -63,14 +63,15 @@ def parse_tests(spec: str) -> list[int]:
     return tests
 
 
-def vault_changes(vault: Path) -> list[dict]:
-    """Every note the turn created, changed or removed, relative to pristine dummyVault."""
+def vault_changes(vault: Path, added: dict[str, str] | None = None) -> list[dict]:
+    """Every note the turn created, changed or removed, relative to pristine dummyVault plus the
+    case's own notes (`added`: cases.json vault_files)."""
     def files(root):
         return {p.relative_to(root).as_posix(): p for p in root.rglob("*")
                 if p.is_file() and not any(part in SKIPPED or part.startswith(".obsidian-mcp-")
                                           for part in p.relative_to(root).parts)}
 
-    before, after = files(DUMMY_VAULT), files(vault)
+    before, after = {**files(DUMMY_VAULT), **{rel: Path(src) for rel, src in (added or {}).items()}}, files(vault)
     changes = []
     for rel in sorted(set(before) | set(after)):
         old = before[rel].read_text(errors="replace") if rel in before else None
@@ -83,6 +84,16 @@ def vault_changes(vault: Path) -> list[dict]:
 def copy_vault(destination: Path) -> None:
     """Copy notes, excluding interactive indexes/locks and their SQLite sidecars."""
     shutil.copytree(DUMMY_VAULT, destination, symlinks=True, ignore=shutil.ignore_patterns(".obsidian-mcp-*"))
+
+
+def add_case_notes(vault: Path, added: dict[str, str], env: dict) -> None:
+    """A case's own notes (cases.json vault_files) into its scratch vault, and into the semantic
+    index: the indexer is incremental, so it embeds only these."""
+    for rel, source in added.items():
+        (vault / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, vault / rel)
+    subprocess.run(["uv", "run", "obsidian-mcp-index"], cwd=REPO / "servers" / "obsidian", env=env, check=True,
+                   capture_output=True)
 
 
 def run_turn(batch: Path, env: dict, prompt: str, think: str, timeout: int, case: dict | None = None) -> dict:
@@ -227,13 +238,16 @@ def main():
                     shutil.rmtree(vault)
                     copy_vault(vault)
                     shutil.copy2(pristine_index, index)
+                    added = cases.get(test, {}).get("vault_files", {})
+                    if added:
+                        add_case_notes(vault, added, env)
                     started, day = time.monotonic(), date.today().isoformat()
                     prompt = prompts.get(test, cases.get(test, {}).get("turns", [{}])[0].get("prompt", ""))
                     case_env = {**env, "NURU_DB_PATH": str(batch / "history" / f"test-{test}-{think}-{repeat}.sqlite3")}
                     record = run_turn(batch, case_env, prompt, think, args.timeout, cases.get(test))
                     record.update({"test": test, "tier": think, "repeat": repeat, "prompt": prompt, "date": day,
                                    "wall_seconds": round(time.monotonic() - started, 1),
-                                   "vault_changes": vault_changes(vault)})
+                                   "vault_changes": vault_changes(vault, added)})
                     results.write(json.dumps(record) + "\n")
                     results.flush()
                     done += 1
