@@ -48,11 +48,9 @@ INDEX_ENV = ("OBSIDIAN_EMBED_MODEL", "OBSIDIAN_CHUNK_CHARS", "OLLAMA_HOST", "OBS
 
 def isolate() -> None:
     """Give the MCP servers the batch's settings, in either route's process. They get a restricted env from
-    Session, so without this Laya would log to the real decision log, and the notes server would take
-    .env.obsidian's embedding settings rather than those the batch's index was built with."""
+    Session, so the notes server must receive the same embedding settings as the batch's index."""
     from core import session
 
-    session.LAYA_SERVER_PARAMS.env["NURU_DECISION_CONFIG"] = os.environ["NURU_DECISION_CONFIG"]
     session.OBSIDIAN_SERVER_PARAMS.env.update({k: os.environ[k] for k in INDEX_ENV if k in os.environ})
 
 

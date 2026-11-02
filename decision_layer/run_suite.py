@@ -182,9 +182,8 @@ def main():
     parser.add_argument("--allow-cloud", action="store_true", help="required when NURU_MAIN_MODEL is a Claude "
                         "model (anthropic:...): the batch then calls the paid Claude API, and the notes it reads "
                         "leave the machine")
-    parser.add_argument("--enforce", default="", help="decision points to enforce IN THIS BATCH ONLY (comma-separated, "
-                        "or 'all'); its config marks thresholds calibrated so it loads - a test of the enforce "
-                        "paths, not of calibrated thresholds")
+    parser.add_argument("--enforce", default="", help="deterministic safeguards to enforce IN THIS BATCH ONLY "
+                        "(step_cap,write_checks,watch_thinking, or 'all')")
     args = parser.parse_args()
 
     require_cloud_opt_in(args.allow_cloud)
@@ -196,6 +195,12 @@ def main():
     unknown = set(tests) - (set(prompts) | set(cases))
     if unknown:
         sys.exit(f"unknown test IDs: {sorted(unknown)}")
+    points = []
+    if args.enforce:
+        allowed = {"step_cap", "write_checks", "watch_thinking"}
+        points = sorted(allowed) if args.enforce == "all" else args.enforce.split(",")
+        if unknown := set(points) - allowed:
+            sys.exit(f"unknown deterministic safeguards: {sorted(unknown)}")
     batch = RUNS / f"suite-{args.label}-{datetime.now():%Y%m%d-%H%M%S}"
     vault, index, pristine_index = batch / "vault", batch / "semantic.sqlite3", batch / "semantic.pristine.sqlite3"
     batch.mkdir(parents=True)
@@ -204,15 +209,9 @@ def main():
     config["database"] = str(batch / "decisions.sqlite3")
     header = ""
     if args.enforce:
-        points = list(config["decision_points"]) if args.enforce == "all" else args.enforce.split(",")
         for point in points:
             config["decision_points"][point] = "enforce"
-        for options in config["thresholds"].values():
-            for thresholds in options.values():
-                for threshold in thresholds.values():
-                    threshold["calibration"] = {"date": datetime.now().date(), "labels": 0, "held_out": 1}
-        header = ("# TEST ONLY - written by run_suite.py --enforce for one batch. The thresholds are NOT\n"
-                  "# calibrated; they are marked so only so that this config loads with enforce on.\n")
+        header = "# TEST ONLY - written by run_suite.py --enforce for one batch. Deterministic safeguards only.\n"
     (batch / "decision_layer.yaml").write_text(header + yaml.safe_dump(config, sort_keys=False))
     (batch / "manifest.json").write_text(json.dumps(
         manifest.build({k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},

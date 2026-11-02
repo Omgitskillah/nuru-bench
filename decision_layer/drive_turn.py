@@ -4,7 +4,7 @@ ask one prompt or a sequence of turns using that same Session, and write JSON.
 run_suite.py sets the environment - VAULT_PATH (the scratch copy), OBSIDIAN_SEMANTIC_DB (its
 pre-built index, outside the vault), NURU_DB_PATH / NURU_LOG_DIR / NURU_DECISION_CONFIG (the run's
 own history, logs and decision log), PATH (with ripgrep) - before this imports core.session, which
-reads them at import. The obsidian and laya servers get a restricted env from the MCP client, so
+reads them at import. The obsidian server gets a restricted env from the MCP client, so
 their params are patched here to carry the vault, the index and the config.
 """
 
@@ -45,22 +45,10 @@ def main():
     session.OBSIDIAN_SERVER_PARAMS = StdioServerParameters(
         command="uv", args=["run", "obsidian-mcp"], cwd=session.OBSIDIAN_DIR, env=env
     )
-    session.LAYA_SERVER_PARAMS.env["NURU_DECISION_CONFIG"] = os.environ["NURU_DECISION_CONFIG"]
     session.THINK = session.PROFILE.think(session.PROFILE.default if args.think == "default" else args.think)
 
     started = time.monotonic()
     s = session.Session.start()
-    # Laya loads its checkpoints in the background (~10 s). A person is still typing by then; a
-    # driver isn't, and every turn's first decisions would be fallbacks - so wait, like a person.
-    laya_state = "off" if s.shadow.off == session.LAYA_POINTS else "unknown"  # all off: never started
-    for _ in range(120 if laya_state != "off" else 0):
-        try:
-            laya_state = json.loads(s.tools.call_harness_tool("health", {}).text)["laya"]["state"]
-        except Exception:
-            laya_state = "unreachable"
-        if laya_state != "loading":
-            break
-        time.sleep(0.5)
     ready = time.monotonic()
     records = []
     case = json.loads(args.case.read_text()) if args.case else None
@@ -100,7 +88,7 @@ def main():
             if cancel.is_set():
                 failure = failure or f"turn timed out after {args.turn_timeout:g} s"
             records.append({
-                "prompt": prompt, "think": args.think, "session_id": s.logger.session_id, "laya_state": laya_state,
+                "prompt": prompt, "think": args.think, "session_id": s.logger.session_id,
                 "reply": reply, "tool_calls": tool_calls, "thinking_events": thinking,
                 "retried_without_thinking": retried, "failure": failure, "asked": asked, "timed_out": cancel.is_set(),
                 "turn_seconds": round(time.monotonic() - turn_started, 1),

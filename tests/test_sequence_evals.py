@@ -73,7 +73,6 @@ def test_driver_keeps_one_session_for_sequence_and_records_numeric_failures(modu
     class FakeSession:
         shadow = SimpleNamespace(failures=0, off=set())
         logger = SimpleNamespace(session_id="test")
-        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text='{"laya":{"state":"ready"}}'))
         def continuation_context(self):
             return "previous answer" if prompts else ""
         def ask(self, prompt, cancel=None):
@@ -108,7 +107,6 @@ def test_driver_cancels_a_turn_at_its_deadline_and_does_not_send_later_turns(mod
     class FakeSession:
         shadow = SimpleNamespace(failures=0, off=set())
         logger = SimpleNamespace(session_id="test")
-        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text='{"laya":{"state":"ready"}}'))
         def continuation_context(self):
             return ""
         def ask(self, prompt, cancel=None):
@@ -147,7 +145,6 @@ def test_a_timed_out_first_turn_stops_every_later_turn_of_the_sequence(modules, 
     class FakeSession:
         shadow = SimpleNamespace(failures=0, off=set())
         logger = SimpleNamespace(session_id="test")
-        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text='{"laya":{"state":"ready"}}'))
         def ask(self, prompt, cancel=None):
             prompts.append(prompt)
             while prompt == "t1" and not cancel.is_set():
@@ -324,7 +321,6 @@ def test_a_driven_case_that_writes_is_scored_by_its_writes_without_a_cases_overr
     class FakeSession:
         shadow = SimpleNamespace(failures=0, off=set())
         logger = SimpleNamespace(session_id="test")
-        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text='{"laya":{"state":"ready"}}'))
         def continuation_context(self):
             return ""
         def ask(self, prompt, cancel=None):
@@ -492,13 +488,12 @@ def test_the_driver_records_each_kind_of_event_and_each_turns_own_model_calls(mo
     from types import SimpleNamespace
     from core.questions import Question, YES_NO
     _, _, _, driver = modules
-    health = iter(['{"laya":{"state":"loading"}}', '{"laya":{"state":"loading"}}', '{"laya":{"state":"ready"}}'])
     log = tmp_path / "logs" / "20261101_seq.jsonl"
 
     class FakeSession:
-        shadow = SimpleNamespace(failures=1, off=set())  # Laya on: wait while it loads
+        shadow = SimpleNamespace(failures=1)
         logger = SimpleNamespace(session_id="seq")
-        tools = SimpleNamespace(call_harness_tool=lambda *a: SimpleNamespace(text=next(health)))
+        tools = None
 
         def ask(self, prompt, cancel=None):
             with log.open("a") as f:  # the session logs a turn's start and its model calls
@@ -521,7 +516,7 @@ def test_the_driver_records_each_kind_of_event_and_each_turns_own_model_calls(mo
 
     output = _driven(driver, monkeypatch, tmp_path, FakeSession, ["one", "two"])
     one, two = output["turns"]
-    assert one["laya_state"] == "ready", "it waited out 'loading'"
+    assert "laya_state" not in one, "retired model health is not part of a new run"
     assert one["tool_calls"] == [{"name": "search", "arguments": {"query": "x"}}, {"name": "ask_an_expert", "arguments": {}}]
     assert one["thinking_events"] == 1 and one["retried_without_thinking"] and one["expert_calls"] == 1
     assert one["failure"] == "the model stopped" and one["reply"] == "found"
@@ -532,14 +527,20 @@ def test_the_driver_records_each_kind_of_event_and_each_turns_own_model_calls(mo
     assert one["shadow_failures"] == 1 and output["retried_without_thinking"] and output["thinking_events"] == 1
 
 
-def test_laya_unreachable_is_recorded_and_the_turn_still_runs(modules, monkeypatch, tmp_path):
+def test_driver_never_probes_a_retired_model_health_tool(modules, monkeypatch, tmp_path):
     from types import SimpleNamespace
     _, _, _, driver = modules
+
+    calls = []
+
+    def record_probe(*args):
+        calls.append(args)
+        raise ConnectionError("down")
 
     class FakeSession:
         shadow = SimpleNamespace(failures=0, off=set())
         logger = SimpleNamespace(session_id="u")
-        tools = SimpleNamespace(call_harness_tool=lambda *a: (_ for _ in ()).throw(ConnectionError("down")))
+        tools = SimpleNamespace(call_harness_tool=record_probe)
 
         def ask(self, prompt, cancel=None):
             yield driver.Text("ok")
@@ -548,7 +549,9 @@ def test_laya_unreachable_is_recorded_and_the_turn_still_runs(modules, monkeypat
             pass
 
     output = _driven(driver, monkeypatch, tmp_path, FakeSession, ["only"])
-    assert output["turns"][0]["laya_state"] == "unreachable" and output["turns"][0]["reply"] == "ok"
+    assert calls == [], "even a swallowed probe failure must be detected"
+    assert "laya_state" not in output["turns"][0]
+    assert output["turns"][0]["reply"] == "ok"
 
 
 def test_run_as_a_script_it_drives_the_case(modules, monkeypatch, tmp_path):
@@ -557,7 +560,7 @@ def test_run_as_a_script_it_drives_the_case(modules, monkeypatch, tmp_path):
     _, _, _, driver = modules
 
     class FakeSession:
-        shadow = SimpleNamespace(failures=0, off=driver.session.LAYA_POINTS)  # Laya off: no wait at all
+        shadow = SimpleNamespace(failures=0)
         logger = SimpleNamespace(session_id="s")
         tools = None
 

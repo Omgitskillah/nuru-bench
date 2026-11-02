@@ -12,14 +12,19 @@ its three runs. Tiers are ordered as config/decision_layer.yaml orders them.
 import statistics
 import sys
 from pathlib import Path
+import yaml
 
-from common import save
-from laya_mcp.config import load_config
+from common import REPO, save
 from score_runs import PASS_MARK, load_results, score
 
 
 def load(batch: Path) -> list[dict]:
     return load_results(batch)
+
+
+def tier_order() -> tuple[str, ...]:
+    """Read only the generic tier ordering; no learned model package is needed."""
+    return tuple(yaml.safe_load((REPO / "config/decision_layer.yaml").read_text(encoding="utf-8"))["tiers"]["order"])
 
 
 def tier_of(think: str) -> str:
@@ -61,7 +66,7 @@ def labels(results: dict, order: tuple[str, ...]) -> dict[int, str]:
 def main():
     batch = Path(sys.argv[1])
     results = table(load(batch))
-    order = load_config().tiers.order
+    order = tier_order()
     labelled = labels(results, order)
     path = save("tier_labels", {"batch": str(batch), "pass_mark": PASS_MARK, "results": results, "labels": labelled})
     for test in sorted(results):
