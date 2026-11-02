@@ -1,0 +1,709 @@
+{
+ "ollama": "0.40.11",
+ "models": {
+  "qwen3.5:4b-q8_0": "e15635ee93129fd2086640926e900c37589c5167561104abc3914bd6644c7e07",
+  "granite4.2:3b-q8_0": "f8163a0ed61634befa356d6bd9cf70ff5d55132fa976df8de688cd34f5595799",
+  "nemotron-3.5-bolt:e4b": "fe4af3f5907b9275322dfea4fc3e4208c64469d0a47e3c05030c10cd27b49b38"
+ },
+ "request": {
+  "stream": false,
+  "think": false,
+  "truncate": false,
+  "options": {
+   "num_ctx": 32768,
+   "num_predict": 1
+  },
+  "messages": "[{role: user, content: <text>\\n<!-- i -->}]",
+  "baseline": "the same request with content 'x'"
+ },
+ "summary": {
+  "texts": 62,
+  "min_ratio": 1.033,
+  "max_ratio": 3.5,
+  "under": []
+ },
+ "rows": [
+  {
+   "text": "nuru/Indexes/area-monitor-project-index.md",
+   "chars": 718,
+   "estimate": 263,
+   "counts": {
+    "qwen3.5:4b-q8_0": 228,
+    "granite4.2:3b-q8_0": 219,
+    "nemotron-3.5-bolt:e4b": 226
+   },
+   "ratio": 1.154
+  },
+  {
+   "text": "nuru/Indexes/technical-knowledge-base.md",
+   "chars": 1859,
+   "estimate": 712,
+   "counts": {
+    "qwen3.5:4b-q8_0": 620,
+    "granite4.2:3b-q8_0": 611,
+    "nemotron-3.5-bolt:e4b": 618
+   },
+   "ratio": 1.148
+  },
+  {
+   "text": "nuru/People/alice-chen.md",
+   "chars": 1263,
+   "estimate": 470,
+   "counts": {
+    "qwen3.5:4b-q8_0": 414,
+    "granite4.2:3b-q8_0": 407,
+    "nemotron-3.5-bolt:e4b": 414
+   },
+   "ratio": 1.135
+  },
+  {
+   "text": "nuru/People/bob-martinez.md",
+   "chars": 539,
+   "estimate": 219,
+   "counts": {
+    "qwen3.5:4b-q8_0": 198,
+    "granite4.2:3b-q8_0": 198,
+    "nemotron-3.5-bolt:e4b": 195
+   },
+   "ratio": 1.106
+  },
+  {
+   "text": "nuru/Preferences/communication-preferences.md",
+   "chars": 510,
+   "estimate": 219,
+   "counts": {
+    "qwen3.5:4b-q8_0": 186,
+    "granite4.2:3b-q8_0": 176,
+    "nemotron-3.5-bolt:e4b": 184
+   },
+   "ratio": 1.177
+  },
+  {
+   "text": "nuru/Preferences/work-environment-preferences.md",
+   "chars": 475,
+   "estimate": 209,
+   "counts": {
+    "qwen3.5:4b-q8_0": 192,
+    "granite4.2:3b-q8_0": 185,
+    "nemotron-3.5-bolt:e4b": 183
+   },
+   "ratio": 1.089
+  },
+  {
+   "text": "nuru/Profiles/sample-profile-one.md",
+   "chars": 455,
+   "estimate": 194,
+   "counts": {
+    "qwen3.5:4b-q8_0": 177,
+    "granite4.2:3b-q8_0": 172,
+    "nemotron-3.5-bolt:e4b": 177
+   },
+   "ratio": 1.096
+  },
+  {
+   "text": "nuru/Profiles/sample-profile-two.md",
+   "chars": 383,
+   "estimate": 178,
+   "counts": {
+    "qwen3.5:4b-q8_0": 157,
+    "granite4.2:3b-q8_0": 146,
+    "nemotron-3.5-bolt:e4b": 157
+   },
+   "ratio": 1.134
+  },
+  {
+   "text": "nuru/Topics/berlin-startup-ecosystem.md",
+   "chars": 597,
+   "estimate": 223,
+   "counts": {
+    "qwen3.5:4b-q8_0": 199,
+    "granite4.2:3b-q8_0": 195,
+    "nemotron-3.5-bolt:e4b": 199
+   },
+   "ratio": 1.121
+  },
+  {
+   "text": "nuru/Topics/freertos-task-management.md",
+   "chars": 2299,
+   "estimate": 892,
+   "counts": {
+    "qwen3.5:4b-q8_0": 785,
+    "granite4.2:3b-q8_0": 775,
+    "nemotron-3.5-bolt:e4b": 807
+   },
+   "ratio": 1.105
+  },
+  {
+   "text": "nuru/Transcripts/architecture-review-meeting.md",
+   "chars": 2162,
+   "estimate": 741,
+   "counts": {
+    "qwen3.5:4b-q8_0": 630,
+    "granite4.2:3b-q8_0": 626,
+    "nemotron-3.5-bolt:e4b": 632
+   },
+   "ratio": 1.172
+  },
+  {
+   "text": "nuru/Transcripts/team-standup-discussion.md",
+   "chars": 698,
+   "estimate": 282,
+   "counts": {
+    "qwen3.5:4b-q8_0": 246,
+    "granite4.2:3b-q8_0": 232,
+    "nemotron-3.5-bolt:e4b": 245
+   },
+   "ratio": 1.146
+  },
+  {
+   "text": "nuru/battery-life-modeling-revised.md",
+   "chars": 2034,
+   "estimate": 844,
+   "counts": {
+    "qwen3.5:4b-q8_0": 750,
+    "granite4.2:3b-q8_0": 713,
+    "nemotron-3.5-bolt:e4b": 745
+   },
+   "ratio": 1.125
+  },
+  {
+   "text": "nuru/battery-life-modeling.md",
+   "chars": 2255,
+   "estimate": 1054,
+   "counts": {
+    "qwen3.5:4b-q8_0": 940,
+    "granite4.2:3b-q8_0": 915,
+    "nemotron-3.5-bolt:e4b": 959
+   },
+   "ratio": 1.099
+  },
+  {
+   "text": "nuru/berlin-admin-chaos-notes.md",
+   "chars": 1272,
+   "estimate": 510,
+   "counts": {
+    "qwen3.5:4b-q8_0": 473,
+    "granite4.2:3b-q8_0": 488,
+    "nemotron-3.5-bolt:e4b": 483
+   },
+   "ratio": 1.045
+  },
+  {
+   "text": "nuru/gym-and-life-log.md",
+   "chars": 1411,
+   "estimate": 801,
+   "counts": {
+    "qwen3.5:4b-q8_0": 735,
+    "granite4.2:3b-q8_0": 665,
+    "nemotron-3.5-bolt:e4b": 734
+   },
+   "ratio": 1.09
+  },
+  {
+   "text": "nuru/home-lab-parts-inventory.md",
+   "chars": 1429,
+   "estimate": 895,
+   "counts": {
+    "qwen3.5:4b-q8_0": 801,
+    "granite4.2:3b-q8_0": 690,
+    "nemotron-3.5-bolt:e4b": 800
+   },
+   "ratio": 1.117
+  },
+  {
+   "text": "nuru/one-on-one-with-manager.md",
+   "chars": 1983,
+   "estimate": 663,
+   "counts": {
+    "qwen3.5:4b-q8_0": 576,
+    "granite4.2:3b-q8_0": 567,
+    "nemotron-3.5-bolt:e4b": 576
+   },
+   "ratio": 1.151
+  },
+  {
+   "text": "nuru/priya-raman.md",
+   "chars": 1048,
+   "estimate": 365,
+   "counts": {
+    "qwen3.5:4b-q8_0": 341,
+    "granite4.2:3b-q8_0": 330,
+    "nemotron-3.5-bolt:e4b": 324
+   },
+   "ratio": 1.07
+  },
+  {
+   "text": "nuru/sensor-calibration-data.md",
+   "chars": 1762,
+   "estimate": 917,
+   "counts": {
+    "qwen3.5:4b-q8_0": 750,
+    "granite4.2:3b-q8_0": 661,
+    "nemotron-3.5-bolt:e4b": 742
+   },
+   "ratio": 1.223
+  },
+  {
+   "text": "nuru/shower-thoughts-on-electronics.md",
+   "chars": 1956,
+   "estimate": 727,
+   "counts": {
+    "qwen3.5:4b-q8_0": 658,
+    "granite4.2:3b-q8_0": 645,
+    "nemotron-3.5-bolt:e4b": 649
+   },
+   "ratio": 1.105
+  },
+  {
+   "text": "nuru/sunday-chapati-for-mom.md",
+   "chars": 1546,
+   "estimate": 536,
+   "counts": {
+    "qwen3.5:4b-q8_0": 497,
+    "granite4.2:3b-q8_0": 491,
+    "nemotron-3.5-bolt:e4b": 493
+   },
+   "ratio": 1.078
+  },
+  {
+   "text": "nuru/suspicious-vendor-email-paste.md",
+   "chars": 1063,
+   "estimate": 437,
+   "counts": {
+    "qwen3.5:4b-q8_0": 396,
+    "granite4.2:3b-q8_0": 379,
+    "nemotron-3.5-bolt:e4b": 400
+   },
+   "ratio": 1.093
+  },
+  {
+   "text": "nuru/uart-ring-buffer-snippets.md",
+   "chars": 1870,
+   "estimate": 836,
+   "counts": {
+    "qwen3.5:4b-q8_0": 697,
+    "granite4.2:3b-q8_0": 692,
+    "nemotron-3.5-bolt:e4b": 734
+   },
+   "ratio": 1.139
+  },
+  {
+   "text": "nuru/unicode-and-formatting-torture.md",
+   "chars": 1515,
+   "estimate": 598,
+   "counts": {
+    "qwen3.5:4b-q8_0": 517,
+    "granite4.2:3b-q8_0": 526,
+    "nemotron-3.5-bolt:e4b": 506
+   },
+   "ratio": 1.137
+  },
+  {
+   "text": "shared/Projects/area-monitor-device-redesign.md",
+   "chars": 2788,
+   "estimate": 1096,
+   "counts": {
+    "qwen3.5:4b-q8_0": 996,
+    "granite4.2:3b-q8_0": 949,
+    "nemotron-3.5-bolt:e4b": 1002
+   },
+   "ratio": 1.094
+  },
+  {
+   "text": "shared/Projects/memfault-integration-initiative.md",
+   "chars": 2442,
+   "estimate": 903,
+   "counts": {
+    "qwen3.5:4b-q8_0": 806,
+    "granite4.2:3b-q8_0": 766,
+    "nemotron-3.5-bolt:e4b": 813
+   },
+   "ratio": 1.111
+  },
+  {
+   "text": "shared/Sessions/firmware-development-session.md",
+   "chars": 683,
+   "estimate": 276,
+   "counts": {
+    "qwen3.5:4b-q8_0": 233,
+    "granite4.2:3b-q8_0": 219,
+    "nemotron-3.5-bolt:e4b": 229
+   },
+   "ratio": 1.185
+  },
+  {
+   "text": "shared/Sessions/learning-session-mcp-architecture.md",
+   "chars": 686,
+   "estimate": 269,
+   "counts": {
+    "qwen3.5:4b-q8_0": 229,
+    "granite4.2:3b-q8_0": 216,
+    "nemotron-3.5-bolt:e4b": 230
+   },
+   "ratio": 1.17
+  },
+  {
+   "text": "shared/debugging-session-psm-not-engaging.md",
+   "chars": 2070,
+   "estimate": 870,
+   "counts": {
+    "qwen3.5:4b-q8_0": 766,
+    "granite4.2:3b-q8_0": 712,
+    "nemotron-3.5-bolt:e4b": 763
+   },
+   "ratio": 1.136
+  },
+  {
+   "text": "user/code-review-standards.md",
+   "chars": 661,
+   "estimate": 246,
+   "counts": {
+    "qwen3.5:4b-q8_0": 214,
+    "granite4.2:3b-q8_0": 208,
+    "nemotron-3.5-bolt:e4b": 215
+   },
+   "ratio": 1.144
+  },
+  {
+   "text": "user/correction-the-47-minute-mystery.md",
+   "chars": 1118,
+   "estimate": 453,
+   "counts": {
+    "qwen3.5:4b-q8_0": 403,
+    "granite4.2:3b-q8_0": 379,
+    "nemotron-3.5-bolt:e4b": 403
+   },
+   "ratio": 1.124
+  },
+  {
+   "text": "user/daily-2026-09-17.md",
+   "chars": 1555,
+   "estimate": 787,
+   "counts": {
+    "qwen3.5:4b-q8_0": 686,
+    "granite4.2:3b-q8_0": 594,
+    "nemotron-3.5-bolt:e4b": 683
+   },
+   "ratio": 1.147
+  },
+  {
+   "text": "user/daily-2026-09-18.md",
+   "chars": 1607,
+   "estimate": 752,
+   "counts": {
+    "qwen3.5:4b-q8_0": 681,
+    "granite4.2:3b-q8_0": 609,
+    "nemotron-3.5-bolt:e4b": 678
+   },
+   "ratio": 1.104
+  },
+  {
+   "text": "user/daily-note.md",
+   "chars": 1816,
+   "estimate": 743,
+   "counts": {
+    "qwen3.5:4b-q8_0": 655,
+    "granite4.2:3b-q8_0": 619,
+    "nemotron-3.5-bolt:e4b": 647
+   },
+   "ratio": 1.134
+  },
+  {
+   "text": "user/directives-for-local-model.md",
+   "chars": 823,
+   "estimate": 295,
+   "counts": {
+    "qwen3.5:4b-q8_0": 269,
+    "granite4.2:3b-q8_0": 262,
+    "nemotron-3.5-bolt:e4b": 271
+   },
+   "ratio": 1.089
+  },
+  {
+   "text": "user/meeting-participation-guidelines.md",
+   "chars": 666,
+   "estimate": 244,
+   "counts": {
+    "qwen3.5:4b-q8_0": 212,
+    "granite4.2:3b-q8_0": 202,
+    "nemotron-3.5-bolt:e4b": 211
+   },
+   "ratio": 1.151
+  },
+  {
+   "text": "user/modem-configuration-update.md",
+   "chars": 792,
+   "estimate": 304,
+   "counts": {
+    "qwen3.5:4b-q8_0": 280,
+    "granite4.2:3b-q8_0": 260,
+    "nemotron-3.5-bolt:e4b": 273
+   },
+   "ratio": 1.086
+  },
+  {
+   "text": "user/september-15-daily.md",
+   "chars": 750,
+   "estimate": 308,
+   "counts": {
+    "qwen3.5:4b-q8_0": 260,
+    "granite4.2:3b-q8_0": 244,
+    "nemotron-3.5-bolt:e4b": 261
+   },
+   "ratio": 1.18
+  },
+  {
+   "text": "user/team-standup-action-items-resolved.md",
+   "chars": 810,
+   "estimate": 309,
+   "counts": {
+    "qwen3.5:4b-q8_0": 275,
+    "granite4.2:3b-q8_0": 266,
+    "nemotron-3.5-bolt:e4b": 270
+   },
+   "ratio": 1.124
+  },
+  {
+   "text": "system.md",
+   "chars": 13091,
+   "estimate": 4213,
+   "counts": {
+    "qwen3.5:4b-q8_0": 3562,
+    "granite4.2:3b-q8_0": 3627,
+    "nemotron-3.5-bolt:e4b": 3625
+   },
+   "ratio": 1.162
+  },
+  {
+   "text": "soak table",
+   "chars": 14805,
+   "estimate": 13334,
+   "counts": {
+    "qwen3.5:4b-q8_0": 11452,
+    "granite4.2:3b-q8_0": 8626,
+    "nemotron-3.5-bolt:e4b": 11451
+   },
+   "ratio": 1.164
+  },
+  {
+   "text": "json: soak table",
+   "chars": 15095,
+   "estimate": 13599,
+   "counts": {
+    "qwen3.5:4b-q8_0": 11474,
+    "granite4.2:3b-q8_0": 8660,
+    "nemotron-3.5-bolt:e4b": 11492
+   },
+   "ratio": 1.183
+  },
+  {
+   "text": "json: nuru/home-lab-parts-inventory.md",
+   "chars": 1534,
+   "estimate": 960,
+   "counts": {
+    "qwen3.5:4b-q8_0": 826,
+    "granite4.2:3b-q8_0": 738,
+    "nemotron-3.5-bolt:e4b": 854
+   },
+   "ratio": 1.124
+  },
+  {
+   "text": "json: nuru/one-on-one-with-manager.md",
+   "chars": 2100,
+   "estimate": 747,
+   "counts": {
+    "qwen3.5:4b-q8_0": 611,
+    "granite4.2:3b-q8_0": 628,
+    "nemotron-3.5-bolt:e4b": 651
+   },
+   "ratio": 1.147
+  },
+  {
+   "text": "adv: underscores",
+   "chars": 2000,
+   "estimate": 250,
+   "counts": {
+    "qwen3.5:4b-q8_0": 37,
+    "granite4.2:3b-q8_0": 36,
+    "nemotron-3.5-bolt:e4b": 130
+   },
+   "ratio": 1.923
+  },
+  {
+   "text": "adv: spaces",
+   "chars": 2008,
+   "estimate": 252,
+   "counts": {
+    "qwen3.5:4b-q8_0": 23,
+    "granite4.2:3b-q8_0": 22,
+    "nemotron-3.5-bolt:e4b": 72
+   },
+   "ratio": 3.5
+  },
+  {
+   "text": "adv: tabs",
+   "chars": 2000,
+   "estimate": 250,
+   "counts": {
+    "qwen3.5:4b-q8_0": 4,
+    "granite4.2:3b-q8_0": 129,
+    "nemotron-3.5-bolt:e4b": 4
+   },
+   "ratio": 1.938
+  },
+  {
+   "text": "adv: punctuation run",
+   "chars": 1860,
+   "estimate": 1860,
+   "counts": {
+    "qwen3.5:4b-q8_0": 1205,
+    "granite4.2:3b-q8_0": 1204,
+    "nemotron-3.5-bolt:e4b": 1205
+   },
+   "ratio": 1.544
+  },
+  {
+   "text": "adv: dashes and equals (rules)",
+   "chars": 3240,
+   "estimate": 440,
+   "counts": {
+    "qwen3.5:4b-q8_0": 84,
+    "granite4.2:3b-q8_0": 84,
+    "nemotron-3.5-bolt:e4b": 244
+   },
+   "ratio": 1.803
+  },
+  {
+   "text": "adv: long letter run",
+   "chars": 2000,
+   "estimate": 400,
+   "counts": {
+    "qwen3.5:4b-q8_0": 255,
+    "granite4.2:3b-q8_0": 254,
+    "nemotron-3.5-bolt:e4b": 255
+   },
+   "ratio": 1.569
+  },
+  {
+   "text": "adv: base64",
+   "chars": 2000,
+   "estimate": 1667,
+   "counts": {
+    "qwen3.5:4b-q8_0": 1481,
+    "granite4.2:3b-q8_0": 1456,
+    "nemotron-3.5-bolt:e4b": 1411
+   },
+   "ratio": 1.126
+  },
+  {
+   "text": "adv: hex hashes",
+   "chars": 1949,
+   "estimate": 2292,
+   "counts": {
+    "qwen3.5:4b-q8_0": 1726,
+    "granite4.2:3b-q8_0": 1144,
+    "nemotron-3.5-bolt:e4b": 1732
+   },
+   "ratio": 1.323
+  },
+  {
+   "text": "adv: urls",
+   "chars": 2344,
+   "estimate": 1500,
+   "counts": {
+    "qwen3.5:4b-q8_0": 1028,
+    "granite4.2:3b-q8_0": 1074,
+    "nemotron-3.5-bolt:e4b": 1243
+   },
+   "ratio": 1.207
+  },
+  {
+   "text": "adv: numbers csv",
+   "chars": 4516,
+   "estimate": 6170,
+   "counts": {
+    "qwen3.5:4b-q8_0": 4308,
+    "granite4.2:3b-q8_0": 2439,
+    "nemotron-3.5-bolt:e4b": 4308
+   },
+   "ratio": 1.432
+  },
+  {
+   "text": "adv: json numbers",
+   "chars": 4439,
+   "estimate": 3568,
+   "counts": {
+    "qwen3.5:4b-q8_0": 2742,
+    "granite4.2:3b-q8_0": 2285,
+    "nemotron-3.5-bolt:e4b": 2742
+   },
+   "ratio": 1.301
+  },
+  {
+   "text": "adv: chinese",
+   "chars": 880,
+   "estimate": 1120,
+   "counts": {
+    "qwen3.5:4b-q8_0": 445,
+    "granite4.2:3b-q8_0": 1084,
+    "nemotron-3.5-bolt:e4b": 525
+   },
+   "ratio": 1.033
+  },
+  {
+   "text": "adv: arabic",
+   "chars": 1740,
+   "estimate": 1770,
+   "counts": {
+    "qwen3.5:4b-q8_0": 395,
+    "granite4.2:3b-q8_0": 1116,
+    "nemotron-3.5-bolt:e4b": 487
+   },
+   "ratio": 1.586
+  },
+  {
+   "text": "adv: emoji",
+   "chars": 900,
+   "estimate": 2300,
+   "counts": {
+    "qwen3.5:4b-q8_0": 2005,
+    "granite4.2:3b-q8_0": 2204,
+    "nemotron-3.5-bolt:e4b": 905
+   },
+   "ratio": 1.044
+  },
+  {
+   "text": "adv: accented prose",
+   "chars": 1875,
+   "estimate": 750,
+   "counts": {
+    "qwen3.5:4b-q8_0": 556,
+    "granite4.2:3b-q8_0": 680,
+    "nemotron-3.5-bolt:e4b": 532
+   },
+   "ratio": 1.103
+  },
+  {
+   "text": "adv: python code",
+   "chars": 4183,
+   "estimate": 1502,
+   "counts": {
+    "qwen3.5:4b-q8_0": 1179,
+    "granite4.2:3b-q8_0": 1318,
+    "nemotron-3.5-bolt:e4b": 1297
+   },
+   "ratio": 1.14
+  },
+  {
+   "text": "adv: indented markdown",
+   "chars": 3379,
+   "estimate": 1589,
+   "counts": {
+    "qwen3.5:4b-q8_0": 1440,
+    "granite4.2:3b-q8_0": 1179,
+    "nemotron-3.5-bolt:e4b": 1440
+   },
+   "ratio": 1.103
+  }
+ ]
+}
