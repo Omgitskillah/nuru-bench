@@ -13,7 +13,7 @@ for p in json.loads((R / os.environ.get("PROMPTS", "prompts.json")).read_text())
     env = {**os.environ, "VAULT_PATH": f"{R}/vault", "OBSIDIAN_SEMANTIC_DB": f"{R}/semantic.sqlite3",
            "NURU_DB_PATH": f"{R}/db/{p['id']:02d}.db", "NURU_LOG_DIR": f"{R}/logs",
            "PATH": "/opt/homebrew/bin:" + os.environ["PATH"]}
-    # Laya logs to this run's own decision database, never Nuru's real one.
+    # Decision events use this run's own database, never Nuru's real one.
     cfg = R / "cfg" / f"{p['id']}.yaml"
     cfg.parent.mkdir(exist_ok=True)
     text = open("/Users/aluchoayisi/Desktop/Nuru/config/decision_layer.yaml").read()

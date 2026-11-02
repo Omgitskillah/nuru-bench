@@ -52,3 +52,16 @@ Batches go to `decision_layer/.runs/` (ignored). Before any run that loads a loc
 ## CI
 
 [`.github/workflows/tests.yml`](.github/workflows/tests.yml) checks out Nuru's `main`, puts this repo at `nuru/evals` and runs `tests/` on Ubuntu. It then holds the modules listed in `tools/coverage_check.py` to Nuru's rule: above 90% of their lines, and all of them in a module of at most 150; add a module there when you change its code. A manual run can also do the 1K/10K stewardship scale evaluation, which used to be an option in Nuru's CI.
+
+### Follow-up: live route process deadlines
+
+The following pre-existing `live_wp01` gaps remain to be fixed and regression-tested:
+- Bound the service port wait by a startup deadline, including silent startup hangs.
+- Reap the plugin client with `wait()` after killing it on timeout.
+- Kill the direct route process group after a crash or missing output, as on timeout.
+
+### Decided without the user
+
+Retain historical learned-watch source labels in `watch_report`: deleting them would
+make old decision logs harder to inspect. New runs use code signals only. Track the
+three existing process cleanup gaps separately to keep this removal focused.

@@ -180,3 +180,4 @@ def test_a_retired_learned_gate_is_refused_before_any_index_or_model_run(runner,
     monkeypatch.setattr("sys.argv", ["run_suite", "--tests", "3", "--enforce", "gate_write"])
     with pytest.raises(SystemExit, match="unknown deterministic safeguards"):
         runner.main()
+    assert not (tmp_path / "runs").exists()

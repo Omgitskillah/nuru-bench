@@ -4,7 +4,7 @@ ask one prompt or a sequence of turns using that same Session, and write JSON.
 run_suite.py sets the environment - VAULT_PATH (the scratch copy), OBSIDIAN_SEMANTIC_DB (its
 pre-built index, outside the vault), NURU_DB_PATH / NURU_LOG_DIR / NURU_DECISION_CONFIG (the run's
 own history, logs and decision log), PATH (with ripgrep) - before this imports core.session, which
-reads them at import. The obsidian and laya servers get a restricted env from the MCP client, so
+reads them at import. The obsidian server gets a restricted env from the MCP client, so
 their params are patched here to carry the vault, the index and the config.
 """
 

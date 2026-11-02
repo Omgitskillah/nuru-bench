@@ -195,6 +195,12 @@ def main():
     unknown = set(tests) - (set(prompts) | set(cases))
     if unknown:
         sys.exit(f"unknown test IDs: {sorted(unknown)}")
+    points = []
+    if args.enforce:
+        allowed = {"step_cap", "write_checks", "watch_thinking"}
+        points = sorted(allowed) if args.enforce == "all" else args.enforce.split(",")
+        if unknown := set(points) - allowed:
+            sys.exit(f"unknown deterministic safeguards: {sorted(unknown)}")
     batch = RUNS / f"suite-{args.label}-{datetime.now():%Y%m%d-%H%M%S}"
     vault, index, pristine_index = batch / "vault", batch / "semantic.sqlite3", batch / "semantic.pristine.sqlite3"
     batch.mkdir(parents=True)
@@ -203,10 +209,6 @@ def main():
     config["database"] = str(batch / "decisions.sqlite3")
     header = ""
     if args.enforce:
-        allowed = {"step_cap", "write_checks", "watch_thinking"}
-        points = sorted(allowed) if args.enforce == "all" else args.enforce.split(",")
-        if unknown := set(points) - allowed:
-            sys.exit(f"unknown deterministic safeguards: {sorted(unknown)}")
         for point in points:
             config["decision_points"][point] = "enforce"
         header = "# TEST ONLY - written by run_suite.py --enforce for one batch. Deterministic safeguards only.\n"

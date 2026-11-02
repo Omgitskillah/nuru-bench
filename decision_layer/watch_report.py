@@ -48,6 +48,8 @@ def summary(records: list[dict], steered: dict[str, int]) -> dict:
 
 def would_save(batch: Path) -> list[dict]:
     """Per watched call in a shadow batch: the first signal, where it fired, and where the call ended."""
+    # Historical batches can contain learned-watch signals. Keep their source labels
+    # readable; new runs produce only code_signal rows. This never invokes a model.
     conn = sqlite3.connect(batch / "decisions.sqlite3")
     conn.row_factory = sqlite3.Row
     firsts = {}
