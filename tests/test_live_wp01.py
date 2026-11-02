@@ -74,14 +74,12 @@ def test_isolate_gives_the_notes_server_the_batchs_index_settings(monkeypatch):
     from core import session
 
     monkeypatch.setattr(session.OBSIDIAN_SERVER_PARAMS, "env", dict(session.OBSIDIAN_SERVER_PARAMS.env))
-    monkeypatch.setattr(session.LAYA_SERVER_PARAMS, "env", dict(session.LAYA_SERVER_PARAMS.env))
     monkeypatch.setenv("NURU_DECISION_CONFIG", "/batch/decision_layer.yaml")
     monkeypatch.setenv("OBSIDIAN_EMBED_MODEL", "nomic-embed-text-v2-moe")
     monkeypatch.setenv("OBSIDIAN_CHUNK_CHARS", "900")
     live.isolate()
     assert session.OBSIDIAN_SERVER_PARAMS.env["OBSIDIAN_EMBED_MODEL"] == "nomic-embed-text-v2-moe"
     assert session.OBSIDIAN_SERVER_PARAMS.env["OBSIDIAN_CHUNK_CHARS"] == "900"
-    assert session.LAYA_SERVER_PARAMS.env["NURU_DECISION_CONFIG"] == "/batch/decision_layer.yaml"
 
 
 def test_each_run_gets_a_fresh_index_whatever_a_killed_run_left(tmp_path):

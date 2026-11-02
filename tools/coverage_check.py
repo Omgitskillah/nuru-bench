@@ -11,7 +11,8 @@ import sys
 from pathlib import Path
 
 GATED = ["decision_layer/cases.py", "decision_layer/common.py", "decision_layer/drive_turn.py", "decision_layer/run_suite.py",
-         "model_bakeoff/bakeoff.py", "token_estimate/measure.py", "tools/coverage_check.py"]
+         "decision_layer/tier_labels.py", "model_bakeoff/bakeoff.py", "obsidian_remote/live_wp01.py",
+         "token_estimate/measure.py", "tools/coverage_check.py"]
 SMALL = 150
 FLOOR = 90.0
 

@@ -149,7 +149,7 @@ def test_the_token_summary_adds_up_each_test_and_the_round(runner, tmp_path):
     assert "157 in" in text and "test 38" in text
 
 
-@pytest.mark.parametrize("enforce, points", [("all", None), ("gate_write,check_claim", ["gate_write", "check_claim"])])
+@pytest.mark.parametrize("enforce, points", [("all", None), ("step_cap,write_checks", ["step_cap", "write_checks"])])
 def test_enforce_writes_a_one_batch_config_marked_as_test_only(runner, monkeypatch, tmp_path, enforce, points):
     import yaml
     vault = tmp_path / "fixture"
@@ -167,9 +167,16 @@ def test_enforce_writes_a_one_batch_config_marked_as_test_only(runner, monkeypat
     assert text.startswith("# TEST ONLY - written by run_suite.py --enforce for one batch.")
     config = yaml.safe_load(text)
     shipped = yaml.safe_load((runner.REPO / "config" / "decision_layer.yaml").read_text())
-    chosen = points or list(shipped["decision_points"])
+    chosen = points or ["step_cap", "write_checks", "watch_thinking"]
     assert config["decision_points"] == {p: "enforce" if p in chosen else mode for p, mode in shipped["decision_points"].items()}
-    assert all(t["calibration"]["labels"] == 0 for options in config["thresholds"].values()
-               for thresholds in options.values() for t in thresholds.values())
+    assert config.get("thresholds") == shipped.get("thresholds"), "no calibration data is fabricated"
     assert config["database"] == str(batch / "decisions.sqlite3")
     assert yaml.safe_load((runner.REPO / "config" / "decision_layer.yaml").read_text()) == shipped, "the shipped config is untouched"
+
+
+def test_a_retired_learned_gate_is_refused_before_any_index_or_model_run(runner, monkeypatch, tmp_path):
+    monkeypatch.setattr(runner, "RUNS", tmp_path / "runs")
+    monkeypatch.setattr(runner.subprocess, "run", lambda *a, **kw: pytest.fail("no process may run"))
+    monkeypatch.setattr("sys.argv", ["run_suite", "--tests", "3", "--enforce", "gate_write"])
+    with pytest.raises(SystemExit, match="unknown deterministic safeguards"):
+        runner.main()
