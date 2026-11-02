@@ -6,17 +6,24 @@ Run from a Nuru checkout with this repo at nuru/evals, holding the shared comput
 
 Each text is sent alone as one user message to /api/chat (stream false, think false, truncate false,
 num_ctx 32768, num_predict 1) and its count is prompt_eval_count minus that of the message "x": the chat
-template's own tokens. That subtraction is close, not exact (tokenization isn't additive at the boundary),
-and a text is counted on its own, not inside a whole conversation. The output keeps every text's count
-per model, the estimate, the Ollama version, each model's digest and this request shape.
+template's own tokens. Each text goes with a numbered "\n<!-- i -->" tail, so no two prompts are the
+same; the counts include that tail while the estimate is of the text alone. So the
+counts are close, not exact (that, and tokenization isn't additive at the boundary), and a text is
+counted on its own, not inside a whole conversation. The output keeps every text's count per model, the
+estimate and the sha256 of the text measured, the Ollama version, each model's digest, this request
+shape, and what was measured: the Nuru and bench commits (and whether either had uncommitted changes)
+and the sha256 of context_budget.py, so a rerun after either changes can't pass for this calibration.
 """
 import argparse
 import base64
+import hashlib
 import json
 import random
+import subprocess
 import urllib.request
 from pathlib import Path
 
+from core import context_budget
 from core.context_budget import estimate_tokens
 
 EVALS = Path(__file__).resolve().parents[1]
@@ -60,6 +67,17 @@ def texts() -> dict[str, str]:
     return {**found, **adversarial()}
 
 
+def sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def revision(repo: Path) -> dict:
+    """The commit `repo` is at, and whether it has uncommitted changes (which that commit doesn't hold)."""
+    def git(*args):
+        return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, check=True).stdout.strip()
+    return {"commit": git("rev-parse", "HEAD"), "uncommitted_changes": bool(git("status", "--porcelain"))}
+
+
 def post(path: str, body: dict) -> dict:
     request = urllib.request.Request(OLLAMA + path, json.dumps(body).encode(), {"Content-Type": "application/json"})
     with urllib.request.urlopen(request, timeout=600) as response:
@@ -88,12 +106,15 @@ def main():
     rows = []
     for name, text in corpus.items():
         real = max(counts[m][name] for m in args.models)
-        rows.append({"text": name, "chars": len(text), "estimate": estimate_tokens(text),
+        rows.append({"text": name, "sha256": sha256(text), "chars": len(text), "estimate": estimate_tokens(text),
                      "counts": {m: counts[m][name] for m in args.models}, "ratio": round(estimate_tokens(text) / real, 3)})
     ratios = [r["ratio"] for r in rows]
     args.out.write_text(json.dumps({
         "ollama": version, "models": {m: tags.get(m) for m in args.models},
         "request": {**REQUEST, "messages": "[{role: user, content: <text>\\n<!-- i -->}]", "baseline": "the same request with content 'x'"},
+        "measured": {"nuru": revision(NURU), "bench": revision(EVALS),
+                     "estimator_sha256": sha256(Path(context_budget.__file__).read_text(encoding="utf-8"))},
+        "caveat": "counts include the numbered tail and the boundary with the template; the estimate is of the text alone",
         "summary": {"texts": len(rows), "min_ratio": min(ratios), "max_ratio": max(ratios),
                     "under": [r["text"] for r in rows if r["ratio"] < 1]},
         "rows": rows}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

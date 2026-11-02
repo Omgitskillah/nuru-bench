@@ -1,7 +1,8 @@
 """Nuru's F13 coverage rule (tools/coverage_gate.py there) for the bench's own code: every gated module
 above 90% of its executable lines, and all of them in a small one (at most 150). Gated are the modules
-whose behaviour changed since the bench left Nuru (2026-11-01); add a module here when you change its
-code. Reads `coverage json` output whose paths start at the Nuru checkout (nuru/evals/...).
+whose code changed since the bench left Nuru (2026-11-01), even by one value, and this checker itself;
+add a module here when you change its code. Reads `coverage json` output whose paths start at the Nuru
+checkout (nuru/evals/...).
 
     uv run --locked python nuru/evals/tools/coverage_check.py coverage.json
 """
@@ -9,7 +10,8 @@ import json
 import sys
 from pathlib import Path
 
-GATED = ["decision_layer/cases.py", "decision_layer/drive_turn.py", "decision_layer/run_suite.py", "token_estimate/measure.py"]
+GATED = ["decision_layer/cases.py", "decision_layer/common.py", "decision_layer/drive_turn.py", "decision_layer/run_suite.py",
+         "model_bakeoff/bakeoff.py", "token_estimate/measure.py", "tools/coverage_check.py"]
 SMALL = 150
 FLOOR = 90.0
 

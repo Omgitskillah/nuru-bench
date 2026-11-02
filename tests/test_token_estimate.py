@@ -89,6 +89,37 @@ def test_the_record_has_every_texts_counts_less_the_template_with_versions(ollam
     assert [u["model"] for u in ollama.unloaded] == ["m1", "m2"] and all(u["keep_alive"] == 0 for u in ollama.unloaded)
 
 
+def test_the_record_says_what_was_measured_so_a_rerun_on_other_code_cant_pass_for_it(ollama, monkeypatch, tmp_path):
+    import hashlib
+    import subprocess
+    monkeypatch.setattr(measure, "texts", lambda: {"a": "hello"})
+    out = tmp_path / "counts.json"
+    monkeypatch.setattr("sys.argv", ["measure", "--out", str(out), "m1"])
+    measure.main()
+    record = json.loads(out.read_text())
+    for repo, key in ((measure.NURU, "nuru"), (measure.EVALS, "bench")):
+        git = lambda *args: subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, check=True).stdout.strip()
+        assert record["measured"][key] == {"commit": git("rev-parse", "HEAD"), "uncommitted_changes": bool(git("status", "--porcelain"))}
+    estimator = measure.NURU / "nuru" / "src" / "core" / "context_budget.py"
+    assert record["measured"]["estimator_sha256"] == hashlib.sha256(estimator.read_bytes()).hexdigest()
+    assert record["rows"][0]["sha256"] == hashlib.sha256(b"hello").hexdigest()
+    assert "numbered tail" in record["caveat"]
+
+
+def test_uncommitted_changes_are_recorded_as_such(tmp_path):
+    import subprocess
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    git = lambda *args: subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, check=True).stdout.strip()
+    git("init", "-q")
+    (repo / "f").write_text("1")
+    git("add", "f")
+    git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-qm", "f")
+    assert measure.revision(repo) == {"commit": git("rev-parse", "HEAD"), "uncommitted_changes": False}
+    (repo / "f").write_text("2")
+    assert measure.revision(repo)["uncommitted_changes"] is True
+
+
 def test_run_as_a_script_it_measures_the_whole_corpus(ollama, monkeypatch, tmp_path):
     import runpy
     out = tmp_path / "counts.json"

@@ -27,10 +27,12 @@ It moves the old folder to a new, uniquely named backup under `.runs/` (on the s
   - `bench4-cases.json` is the case file the full bench runs use: 35–37 and the multi-turn 101–112.
   - `fixtures/` holds notes that only one case needs, copied into that case's vault (`vault_files`).
   - See [decision_layer/README.md](decision_layer/README.md).
-- `vaults/dummyVault/`: the sample vault every suite run copies; `NURU_EVAL_VAULT` overrides it.
+- `vaults/dummyVault/`: the sample vault every suite run copies; `NURU_EVAL_VAULT` overrides it. It keeps the notes server's
+  note index (`.obsidian-mcp-index.sqlite3`): the ids and types of the notes `create_note` made, which the server can't
+  rebuild from the files, and which the single-call evals' searches return. The suite's scratch copies leave it out, as before.
 - `multi_turn/`, `model_bakeoff/`, `tool_checks/`, `vault_steward/`, `obsidian_remote/`: the other evals.
 - `token_estimate/`: how many tokens Nuru's texts really cost per tokenizer, against Nuru's estimate (`core/context_budget.py`): `measure.py` and its dated `counts-*.json`.
-- `tools/coverage_check.py`: the coverage rule CI holds the bench's changed modules to.
+- `tools/coverage_check.py`: the coverage rule CI holds the bench's changed modules, and itself, to.
 - `tests/`: the bench's own tests (runner, scorers, manifest, cases). They use Nuru's test setup (`nuru/tests/conftest.py`) through `tests/conftest.py`.
 - `*.md` at the top: the dated write-ups of earlier checks.
 
